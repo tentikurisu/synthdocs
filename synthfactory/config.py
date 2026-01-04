@@ -39,7 +39,7 @@ class OllamaCfg(BaseModel):
 
 class BedrockCfg(BaseModel):
     enabled: bool = False
-    region: str = "us-east-1"
+    region: str = "eu-west-1"
     model_id: str = "anthropic.claude-3-sonnet-20240307"
     temperature: float = 0.7
     max_tokens: int = 4096

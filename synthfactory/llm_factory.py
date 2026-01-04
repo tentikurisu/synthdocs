@@ -11,7 +11,7 @@ def create_llm_client(
     ollama_base_url: str = "http://127.0.0.1:11434",
     ollama_model: str = "qwen2.5:1.5b-instruct",
     ollama_timeout: int = 60,
-    bedrock_region: str = "us-east-1",
+    bedrock_region: str = "eu-west-1",
     bedrock_model_id: str = "anthropic.claude-3-sonnet-20240307",
     bedrock_temperature: float = 0.7,
 ) -> LLMClient:

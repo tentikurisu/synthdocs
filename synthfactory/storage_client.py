@@ -13,7 +13,7 @@ class StorageClient:
         mode: str = "local",
         local_destination: str = "./artifacts",
         s3_bucket: Optional[str] = None,
-        s3_region: str = "us-east-1",
+        s3_region: str = "eu-west-1",
     ):
         self.mode = mode
         self.local_destination = Path(local_destination)

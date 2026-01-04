@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 env:
-  AWS_REGION: us-east-1
+  AWS_REGION: eu-west-1
   IMAGE_NAME: synthdocs-synthetic-factory
 
 jobs:

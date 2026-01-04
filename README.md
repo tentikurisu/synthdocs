@@ -88,7 +88,7 @@ curl -X POST http://localhost:8080/generate \
 | `LLM_PROVIDER` | "ollama" or "bedrock" | "ollama" |
 | `OLLAMA_BASE_URL` | Ollama endpoint | "http://localhost:11434" |
 | `BEDROCK_MODEL_ID` | Bedrock model ID | "anthropic.claude-3-sonnet-20240307" |
-| `AWS_REGION` | AWS region | "us-east-1" |
+| `AWS_REGION` | AWS region | "eu-west-1" |
 | `API_HOST` | API listen host | "0.0.0.0" |
 | `API_PORT` | API listen port | "8080" |
 
@@ -123,7 +123,7 @@ curl -X POST http://localhost:8080/generate \
    llm:
      provider: "bedrock"
      bedrock:
-       region: "us-east-1"
+       region: "eu-west-1"
        model_id: "anthropic.claude-3-sonnet-20240307"
        temperature: 0.7
    ```

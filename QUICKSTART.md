@@ -87,7 +87,7 @@ Edit `config_aws.yaml`:
 llm:
   provider: "bedrock"
   bedrock:
-    region: "us-east-1"
+    region: "eu-west-1"
     model_id: "anthropic.claude-3-sonnet-20240307"
 
 output:

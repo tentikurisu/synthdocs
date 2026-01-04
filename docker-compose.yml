@@ -10,7 +10,7 @@ services:
       - OUTPUT_MODE=${OUTPUT_MODE:-local}
       - LOCAL_DESTINATION=${LOCAL_DESTINATION:-/app/artifacts}
       - S3_BUCKET=${S3_BUCKET:-}
-      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - AWS_REGION=${AWS_REGION:-eu-west-1}
       - LLM_PROVIDER=${LLM_PROVIDER:-ollama}
       - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
       - BEDROCK_MODEL_ID=${BEDROCK_MODEL_ID:-anthropic.claude-3-sonnet-20240307}
