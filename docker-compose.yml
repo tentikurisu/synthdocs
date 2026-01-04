@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - CONFIG_PATH=config_dev.yaml
+      - OUTPUT_MODE=${OUTPUT_MODE:-local}
+      - LOCAL_DESTINATION=${LOCAL_DESTINATION:-/app/artifacts}
+      - S3_BUCKET=${S3_BUCKET:-}
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - LLM_PROVIDER=${LLM_PROVIDER:-ollama}
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      - BEDROCK_MODEL_ID=${BEDROCK_MODEL_ID:-anthropic.claude-3-sonnet-20240307}
+    volumes:
+      - ./artifacts:/app/artifacts
+    restart: unless-stopped

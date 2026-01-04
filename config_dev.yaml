@@ -1,0 +1,81 @@
+dataset:
+  count: 40
+  prompt: "A construction company sending customer account letters. Pink paper. Yellow logo. Some messy scans."
+  mix:
+    statement: 0.40
+    letter: 0.60
+  statement:
+    min_rows: 24
+    max_rows: 160
+    rows_per_page: 40
+    pages_max: 4
+  letter:
+    templates:
+      - fee_summary
+      - payment_schedule
+      - direct_debit_mandate
+      - service_change_notice
+      - appointment_notice
+      - appointment_payment_notice
+      - prescription_refill_notice
+      - shipping_schedule
+      - shipping_manifest
+      - delivery_dispute_letter
+      - maintenance_notice
+      - service_outage_notice
+      - service_acquisition_notice
+      - consultancy_quote
+
+llm:
+  provider: "ollama"
+  ollama:
+    enabled: true
+    base_url: "http://your-ollama-machine:11434"
+    model: "qwen2.5:1.5b-instruct"
+    timeout_s: 60
+  bedrock:
+    enabled: false
+    region: "us-east-1"
+    model_id: "anthropic.claude-3-sonnet-20240307"
+    temperature: 0.7
+
+output:
+  mode: "local"
+  local:
+    destination: "./artifacts"
+  s3:
+    bucket: ""
+
+render:
+  watermark_text: "SYNTHETIC TEST DOCUMENT • NOT REAL • FOR TESTING ONLY"
+  page_size: "A4"
+  jpg:
+    width: 1654
+    height: 2339
+    quality: 85
+
+noise:
+  enable: true
+  rotate_deg_max: 0.6
+  blur_radius_max: 0.7
+  contrast_jitter: 0.06
+  brightness_jitter: 0.05
+  speckle_amount: 0.0002
+  jpeg_recompress: true
+  jpeg_quality_min: 45
+  jpeg_quality_max: 85
+  partial_crop_prob: 0.22
+  crop_margin_max: 0.08
+  smudge_prob: 0.35
+  smudge_strength: 0.25
+  downsample_prob: 0.35
+  downsample_min_scale: 0.60
+  downsample_max_scale: 0.90
+  text_damage_prob: 0.55
+  text_damage_zones_min: 2
+  text_damage_zones_max: 6
+  text_damage_strength: 0.35
+  text_damage_box_min_px: 120
+  text_damage_box_max_px: 620
+  font_jitter_prob: 0.35
+  font_jitter_strength: 0.35

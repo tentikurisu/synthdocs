@@ -1,0 +1,212 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: SynthDocs Synthetic Factory - AWS Deployment
+
+Globals:
+  Function:
+    Timeout: 900
+    MemorySize: 4096
+    Runtime: python3.11
+  Api:
+    Cors:
+      AllowOrigin: "'*'"
+      AllowMethods: "'*'"
+      AllowHeaders: "'*'"
+
+Parameters:
+  S3BucketName:
+    Type: String
+    Default: synthdocs-generated-documents
+    Description: S3 bucket name for generated documents
+
+Resources:
+  SynthDocsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref S3BucketName
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      VersioningConfiguration:
+        Status: Enabled
+
+  SynthDocsRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: synthdocs-synthetic-factory
+      ImageScanningConfiguration:
+        ScanOnPush: true
+      LifecyclePolicy:
+        LifecyclePolicyText: |
+          {
+            "rules": [
+              {
+                "rulePriority": 1,
+                "description": "Keep last 10 images",
+                "selection": {
+                  "tagStatus": "any",
+                  "countType": "imageCountMoreThan",
+                  "countNumber": 10
+                },
+                "action": {
+                  "type": "expire"
+                }
+              }
+            ]
+          }
+
+  SynthDocsCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: synthdocs-cluster
+
+  TaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+
+  TaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: SynthDocsTaskPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - bedrock:InvokeModel
+                  - bedrock:InvokeModelWithResponseStream
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:ListBucket
+                Resource:
+                  - !GetAtt SynthDocsBucket.Arn
+                  - !Sub ${SynthDocsBucket.Arn}/*
+
+  SynthDocsTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: synthdocs-task
+      Cpu: '2048'
+      Memory: '4096'
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      ExecutionRoleArn: !Ref TaskExecutionRole
+      TaskRoleArn: !Ref TaskRole
+      ContainerDefinitions:
+        - Name: synthdocs-api
+          Image: !Sub '${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${SynthDocsRepository}:latest'
+          PortMappings:
+            - ContainerPort: 8080
+          Environment:
+            - Name: CONFIG_PATH
+              Value: config_aws.yaml
+            - Name: OUTPUT_MODE
+              Value: s3
+            - Name: LOCAL_DESTINATION
+              Value: /tmp/artifacts
+            - Name: S3_BUCKET
+              Value: !Ref S3BucketName
+            - Name: LLM_PROVIDER
+              Value: bedrock
+            - Name: AWS_REGION
+              Value: !Ref AWS::Region
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref SynthDocsLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: synthdocs
+
+  SynthDocsLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /ecs/synthdocs-${AWS::StackName}
+      RetentionInDays: 30
+
+  SynthDocsService:
+    Type: AWS::ECS::Service
+    DependsOn: SynthDocsBucket
+    Properties:
+      ServiceName: synthdocs-service
+      Cluster: !Ref SynthDocsCluster
+      TaskDefinition: !Ref SynthDocsTaskDefinition
+      DesiredCount: 1
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          Subnets:
+            - !Ref SubnetId
+          SecurityGroups:
+            - !Ref SecurityGroupId
+
+  SecurityGroupId:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for SynthDocs service
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          SourceSecurityGroupId: !Ref AlbSecurityGroupId
+
+  AlbSecurityGroupId:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for ALB
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+  SubnetId:
+    Type: String
+    Description: Subnet ID for ECS service (must be provided)
+
+  VpcId:
+    Type: String
+    Description: VPC ID (must be provided)
+
+Outputs:
+  ApiEndpoint:
+    Description: API Gateway endpoint URL
+    Value: !Sub https://${SynthDocsApi}.execute-api.${AWS::Region}.amazonaws.com/prod/
+  BucketName:
+    Description: S3 bucket for generated documents
+    Value: !Ref SynthDocsBucket
+  ClusterName:
+    Description: ECS cluster name
+    Value: !Ref SynthDocsCluster
+  ServiceName:
+    Description: ECS service name
+    Value: !GetAtt SynthDocsService.Name
