@@ -1,0 +1,48 @@
+# ============================================================
+# COPY THIS FILE TO terraform.tfvars AND FILL IN YOUR VALUES
+# ============================================================
+
+# ============================================================
+# REQUIRED SETTINGS (YOU MUST CHANGE THESE)
+# ============================================================
+
+aws_region = "eu-west-1"
+
+# Your GitHub repository URL (personal or organization)
+github_repo = "https://github.com/YOUR_USERNAME/YOUR_REPO.git"
+
+# S3 bucket name (MUST BE UNIQUE across all of AWS!)
+# If reusing: enter existing bucket name
+s3_bucket_name = "synthdocs-YOURNAME-documents"
+
+# Environment name (dev, test, prod, etc.)
+environment = "dev"
+
+# ============================================================
+# INSTANCE SETTINGS
+# ============================================================
+
+# Instance state: "running" or "stopped" (change to stopped to save money!)
+instance_state = "running"
+
+# Instance type: t3.nano (cheapest), t3.micro, t3.small
+instance_type = "t3.nano"
+
+# Who can access API (0.0.0.0/0 = anyone, or office IP range)
+allowed_ip_ranges = ["0.0.0.0/0"]
+
+# ============================================================
+# RESOURCE REUSE OPTIONS (MAKE IT TRIVIAL!)
+# ============================================================
+
+# Set to true to reuse existing resources, false to create new
+# Change this ONE variable and everything else adapts automatically!
+reuse_existing_resources = false
+
+# Only needed if reuse_existing_resources = true
+# Leave empty ("") if you don't want to reuse that specific resource
+
+existing_s3_bucket_name    = ""  # Existing bucket name
+existing_vpc_id           = ""  # Existing VPC ID
+existing_subnet_ids        = []  # List of subnet IDs
+existing_security_group_id = ""  # Existing security group ID
