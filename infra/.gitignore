@@ -1,0 +1,14 @@
+# Ignore sensitive configuration
+terraform.tfvars
+
+# Ignore Terraform state files
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# Ignore crash logs
+crash.log
+crash.*.log
+
+# Ignore lock file (optional - you can commit this)
+# .terraform.lock.hcl

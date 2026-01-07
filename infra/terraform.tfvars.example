@@ -1,0 +1,60 @@
+# ============================================================
+# COPY THIS FILE TO terraform.tfvars AND FILL IN YOUR VALUES
+# ============================================================
+
+# ============================================================
+# REQUIRED SETTINGS (YOU MUST CHANGE THESE)
+# ============================================================
+
+aws_region = "eu-west-1"
+
+# Your GitHub repository URL (for documentation)
+github_repo = "https://github.com/YOUR_USERNAME/YOUR_REPO.git"
+
+# S3 bucket name (MUST BE UNIQUE across all of AWS!)
+# If reusing: enter existing bucket name
+s3_bucket_name = "synthdocs-YOURNAME-documents"
+
+# Environment name (dev, test, prod, etc.)
+environment = "dev"
+
+# ============================================================
+# ECS TASK CONFIGURATION
+# ============================================================
+
+# Number of tasks to run (0 = stopped, 1 = running)
+desired_count = 1
+
+# Task CPU (256 = 0.25 vCPU, 512 = 0.5 vCPU, 1024 = 1 vCPU)
+cpu = 256
+
+# Task memory in MB (512 = 0.5 GB, 1024 = 1 GB, 2048 = 2 GB)
+memory = 512
+
+# Docker image tag from ECR
+# For Bamboo deployments: use ${bamboo.buildNumber} variable
+# For manual deployments: use "latest" or specific tag
+image_tag = "latest"
+
+# ============================================================
+# ACCESS CONTROL
+# ============================================================
+
+# Who can access API (0.0.0.0/0 = anyone, or office IP like 203.0.113.0/24)
+allowed_ip_ranges = ["0.0.0.0/0"]
+
+# ============================================================
+# RESOURCE REUSE OPTIONS (MAKE IT TRIVIAL!)
+# ============================================================
+
+# Set to true to reuse existing resources, false to create new
+# Change this ONE variable and everything else adapts automatically!
+reuse_existing_resources = false
+
+# Only needed if reuse_existing_resources = true
+# Leave empty ("") if you don't want to reuse that specific resource
+
+existing_s3_bucket_name      = ""  # Existing bucket name
+existing_vpc_id             = ""  # Existing VPC ID
+existing_subnet_ids          = []  # List of subnet IDs
+existing_ecs_cluster_name   = ""  # Existing ECS cluster name
