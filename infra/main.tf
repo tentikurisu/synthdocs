@@ -208,7 +208,7 @@ resource "aws_iam_role_policy" "ecs_task_s3_bedrock" {
           "bedrock:InvokeModelWithResponseStream",
           "bedrock:ListFoundationModels"
         ]
-        Resource = "*"
+        Resource = "arn:aws:bedrock:${var.aws_region}:*:foundation-model/anthropic.claude-3-sonnet-20240307"
       }
     ]
   })

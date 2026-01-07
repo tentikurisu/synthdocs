@@ -215,7 +215,7 @@ resource "aws_iam_role_policy" "s3_bedrock_access" {
           "bedrock:InvokeModelWithResponseStream",
           "bedrock:ListFoundationModels"
         ]
-        Resource = "*"
+        Resource = "arn:aws:bedrock:${var.aws_region}:*:foundation-model/anthropic.claude-3-sonnet-20240307"
       }
     ]
   })
@@ -248,15 +248,13 @@ resource "aws_instance" "synthdocs" {
     Name        = "synthdocs-${var.environment}"
     Environment = var.environment
   }
-
-  lifecycle {
-    ignore_changes = [user_data, ami]
-  }
 }
 
 # ============================================================
 # INSTANCE STATE CONTROL (START/STOP)
 # ============================================================
+# NOTE: This null_resource requires AWS CLI to be installed and configured.
+# If AWS CLI is not available, manually start/stop the instance via AWS Console.
 
 resource "null_resource" "instance_state" {
   triggers = {

@@ -62,9 +62,18 @@ variable "image_tag" {
 # ============================================================
 
 variable "allowed_ip_ranges" {
-  description = "Who can access API (0.0.0.0/0 = anyone, or office IP like 203.0.113.0/24)"
+  description = "Who can access API (must specify CIDR blocks, e.g., 203.0.113.0/24)"
   type        = list(string)
-  default     = ["0.0.0.0/0"]
+
+  validation {
+    condition     = length(var.allowed_ip_ranges) > 0
+    error_message = "allowed_ip_ranges must contain at least one CIDR block"
+  }
+
+  validation {
+    condition     = alltrue([for cidr in var.allowed_ip_ranges : can(cidrhost(cidr, 0))])
+    error_message = "allowed_ip_ranges must contain valid CIDR blocks"
+  }
 }
 
 # ============================================================
